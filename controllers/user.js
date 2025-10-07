@@ -13,6 +13,7 @@ export const signup = async (req, res) => {
     //Créer l'utilisateur
     const newUser = new User({
       email: req.body.email,
+      role: req.body.role,
       password: hashedPassword,
     });
     await newUser.save();
