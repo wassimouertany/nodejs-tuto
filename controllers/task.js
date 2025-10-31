@@ -32,16 +32,21 @@ export const fetchById = async (req, res) => {
 };
 export const addTask = async (req, res) => {
   try {
-    console.log("body : ", req.body);
     const newTask = new Task(req.body);
-    console.log("newTask :", newTask);
     await newTask.save();
-    res.status(201).json({
+    return res.status(201).json({
       model: newTask,
       message: "success",
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    const payload = formatError({
+      code: "CREATE_FAILED",
+      message: error.message || "Failed to create task",
+      status: 400,
+      details: [{ field: "task", issue: error.message }],
+      path: req.originalUrl,
+    });
+    return res.status(400).json(payload);
   }
 };
 

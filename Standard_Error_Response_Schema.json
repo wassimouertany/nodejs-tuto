@@ -1,5 +1,4 @@
 {
-  "success": false,
   "error": {
     "code": "RESOURCE_NOT_FOUND",
     "message": "The requested task does not exist",

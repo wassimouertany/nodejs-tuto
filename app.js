@@ -17,3 +17,6 @@ app.use(express.json());
 
 app.use("/api/tasks", taskRouter);
 app.use("/api/users", userRouter);
+import { swaggerUiMiddleware, swaggerSpec } from "./config/swagger.js";
+
+app.use("/api-docs", swaggerUiMiddleware.serve, swaggerUiMiddleware.setup(swaggerSpec));  
