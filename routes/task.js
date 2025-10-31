@@ -99,6 +99,40 @@ router.get("/", taskController.fetchTasks);
  *         description: Task not found
  */ 
 router.get("/:id", taskController.fetchById);
+/**
+ * @swagger
+ * /api/tasks:
+ *   post:
+ *     summary: Create a new task
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []     # Requires authentication (JWT)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Task'
+ *     responses:
+ *       201:
+ *         description: Task successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 model:
+ *                   $ref: '#/components/schemas/Task'
+ *                 message:
+ *                   type: string
+ *                   example: Task created successfully
+ *       400:
+ *         description: Invalid request data
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin role required
+ */
 router.post(
   "/",
   loggedMiddleware,
@@ -106,6 +140,50 @@ router.post(
   validate({ body: createTaskSchema }),
   taskController.addTask
 );
+
+/**
+ * @swagger
+ * /api/tasks/{id}:
+ *   patch:
+ *     summary: Update an existing task
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: The ID of the task to update
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Task'
+ *     responses:
+ *       200:
+ *         description: Task updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 model:
+ *                   $ref: '#/components/schemas/Task'
+ *                 message:
+ *                   type: string
+ *                   example: Task updated successfully
+ *       400:
+ *         description: Invalid request data
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Admin role required
+ *       404:
+ *         description: Task not found
+ */
 router.patch(
   "/:id",
   loggedMiddleware,
@@ -113,4 +191,32 @@ router.patch(
   validate({ params: paramsWithIdSchema, body: updateTaskSchema }),
   taskController.updateTask
 );
+
+/**
+ * @swagger
+ * /api/tasks/{id}:
+ *   delete:
+ *     summary: Delete a task by ID
+ *     tags: [Tasks]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: The ID of the task to delete
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Task deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Task deleted successfully
+ *       404:
+ *         description: Task not found
+ */
 router.delete("/:id", taskController.deleteTask);
