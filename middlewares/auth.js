@@ -1,77 +1,52 @@
 // middlewares/auth.js
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
-import { formatError, paramDetail } from "../utils/errorFormatter.js";
+import { UnauthorizedError, ForbiddenError } from "./errorHandler.js";
 
 export const loggedMiddleware = async (req, res, next) => {
   try {
     const header = req.headers.authorization;
     if (!header) {
-      return res.status(401).json(
-        formatError({
-          code: "UNAUTHORIZED",
-          message: "Missing Authorization header",
-          status: 401,
-          details: [paramDetail("authorization", "Header not provided")],
-          path: req.originalUrl,
-        })
-      );
+      throw new UnauthorizedError("Missing Authorization header", [
+        { field: "authorization", issue: "Header not provided" }
+      ]);
     }
 
     const token = header.split(" ")[1];
+    if (!token) {
+      throw new UnauthorizedError("Invalid Authorization header format", [
+        { field: "authorization", issue: "Token not found in header" }
+      ]);
+    }
+
     const decodedToken = jwt.verify(token, "RANDOM_TOKEN_SECRET");
     const userId = decodedToken.userId;
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(401).json(
-        formatError({
-          code: "UNAUTHORIZED",
-          message: "User does not exist",
-          status: 401,
-          details: [paramDetail("userId", "Invalid token user reference")],
-          path: req.originalUrl,
-        })
-      );
+      throw new UnauthorizedError("User does not exist", [
+        { field: "userId", issue: "Invalid token user reference" }
+      ]);
     }
 
     req.auth = { userId, role: user.role };
     next();
   } catch (error) {
-    return res.status(401).json(
-      formatError({
-        code: "UNAUTHORIZED",
-        message: "Invalid or expired token",
-        status: 401,
-        details: [paramDetail("token", "Is not guuqegjgsed")],
-        path: req.originalUrl,
-      })
-    );
+    // Les erreurs JWT sont automatiquement gérées par errorHandler
+    next(error);
   }
 };
 
 export const isAdmin = (req, res, next) => {
   try {
-    if (req.auth?.role === "admin") return next();
+    if (req.auth?.role === "admin") {
+      return next();
+    }
 
-    return res.status(403).json(
-      formatError({
-        code: "FORBIDDEN",
-        message: "Access forbidden: Admins only",
-        status: 403,
-        details: [paramDetail("role", "User is not admin")],
-        path: req.originalUrl,
-      })
-    );
+    throw new ForbiddenError("Access forbidden: Admins only", [
+      { field: "role", issue: "User is not admin" }
+    ]);
   } catch (error) {
-    return res.status(500).json(
-      formatError({
-        code: "INTERNAL_ERROR",
-        message: "Authorization check failed", ///nkharejha fonction okhra nkharejha function 500
-        status: 500,
-        details: [paramDetail("middleware", error.message)],
-        path: req.originalUrl,
-      })
-    );
+    next(error);
   }
 };

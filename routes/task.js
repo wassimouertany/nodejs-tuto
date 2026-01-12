@@ -97,7 +97,7 @@ router.get("/", taskController.fetchTasks);
  *                   example: success
  *       404:
  *         description: Task not found
- */ 
+ */
 router.get("/:id", taskController.fetchById);
 /**
  * @swagger
@@ -133,13 +133,7 @@ router.get("/:id", taskController.fetchById);
  *       403:
  *         description: Forbidden - Admin role required
  */
-router.post(
-  "/",
-  loggedMiddleware,
-  isAdmin,
-  validate({ body: createTaskSchema }),
-  taskController.addTask
-);
+router.post("/", validate({ body: createTaskSchema }), taskController.addTask);
 
 /**
  * @swagger
