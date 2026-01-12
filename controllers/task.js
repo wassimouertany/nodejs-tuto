@@ -22,7 +22,6 @@ export const fetchById = async (req, res, next) => {
         { field: "id", issue: `Task with id ${id} does not exist` }
       ]);
     }
-
     res.status(200).json({
       model: task,
       message: "success",
